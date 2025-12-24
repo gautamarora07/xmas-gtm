@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Christmas Random Number</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        background: linear-gradient(135deg, #b30000, #ff4d4d);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Poppins', sans-serif;
+        color: white;
+      }
+
+      .card {
+        background: white;
+        color: #b30000;
+        padding: 50px 60px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        max-width: 400px;
+        width: 90%;
+      }
+
+      .title {
+        font-family: 'Mountains of Christmas', cursive;
+        font-size: 36px;
+        margin-bottom: 30px;
+      }
+
+      .number-box {
+        font-size: 80px;
+        font-weight: 700;
+        margin: 30px 0;
+        color: #ff1a1a;
+        min-height: 90px;
+        transition: transform 0.3s ease;
+      }
+
+      .number-box.animate {
+        transform: scale(1.1);
+      }
+
+      button {
+        background: #b30000;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 18px;
+        border-radius: 30px;
+        cursor: pointer;
+        transition:
+          background 0.3s ease,
+          transform 0.2s ease;
+      }
+
+      button:hover {
+        background: #ff1a1a;
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: scale(0.98);
+      }
+
+      .footer {
+        margin-top: 20px;
+        font-size: 14px;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="title">🎄 Christmas Lucky Number 🎄</div>
+
+      <div id="number" class="number-box">—</div>
+
+      <button onclick="generateNumber()">Generate Number</button>
+
+      <div class="footer">Ho Ho Ho! 🎅</div>
+    </div>
+
+    <script>
+      async function generateNumber() {
+        const numberEl = document.getElementById('number');
+        numberEl.textContent = '...';
+
+        try {
+          const response = await fetch('https://l4kpdnmz-3200.inc1.devtunnels.ms/api/lead/contract-upload/random', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            // 🔹 Include body only if your API expects it
+            body: JSON.stringify({
+              source: 'frontend',
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // 👇 Adjust key if backend returns a different field
+          const randomNumber = data.data.randomNumber;
+          console.log('Random Number:', randomNumber);
+
+          numberEl.textContent = randomNumber;
+          numberEl.classList.add('animate');
+
+          setTimeout(() => {
+            numberEl.classList.remove('animate');
+          }, 300);
+        } catch (error) {
+          numberEl.textContent = '❌';
+          console.error('API Error:', error);
+        }
+      }
+    </script>
+  </body>
+</html>
