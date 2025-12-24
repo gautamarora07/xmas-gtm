@@ -89,45 +89,67 @@
       <div class="footer">Ho Ho Ho! 🎅</div>
     </div>
 
-    <script>
-      async function generateNumber() {
-        const numberEl = document.getElementById('number');
-        numberEl.textContent = '...';
+   <script>
+  const USED_KEY = 'used_random_numbers';
 
-        try {
-          const response = await fetch('https://l4kpdnmz-3200.inc1.devtunnels.ms/api/lead/contract-upload/random', {
+  function getUsedNumbers() {
+    return new Set(JSON.parse(localStorage.getItem(USED_KEY) || '[]'));
+  }
+
+  function saveUsedNumbers(set) {
+    localStorage.setItem(USED_KEY, JSON.stringify([...set]));
+  }
+
+  async function generateNumber() {
+    const numberEl = document.getElementById('number');
+    numberEl.textContent = '...';
+
+    const usedNumbers = getUsedNumbers();
+
+    try {
+      let randomNumber;
+      let attempts = 0;
+
+      do {
+        const response = await fetch(
+          'https://l4kpdnmz-3200.inc1.devtunnels.ms/api/lead/contract-upload/random',
+          {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               Accept: 'application/json',
             },
-            // 🔹 Include body only if your API expects it
-            body: JSON.stringify({
-              source: 'frontend',
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            body: JSON.stringify({ source: 'frontend' }),
           }
+        );
 
-          const data = await response.json();
+        if (!response.ok) throw new Error('API failed');
 
-          // 👇 Adjust key if backend returns a different field
-          const randomNumber = data.data.randomNumber;
-          console.log('Random Number:', randomNumber);
+        const data = await response.json();
+        randomNumber = data.data.randomNumber;
 
-          numberEl.textContent = randomNumber;
-          numberEl.classList.add('animate');
-
-          setTimeout(() => {
-            numberEl.classList.remove('animate');
-          }, 300);
-        } catch (error) {
-          numberEl.textContent = '❌';
-          console.error('API Error:', error);
+        attempts++;
+        if (attempts > 10) {
+          alert('No new numbers available!');
+          return;
         }
-      }
-    </script>
+      } while (usedNumbers.has(randomNumber));
+
+      usedNumbers.add(randomNumber);
+      saveUsedNumbers(usedNumbers);
+
+      numberEl.textContent = randomNumber;
+      numberEl.classList.add('animate');
+
+      setTimeout(() => numberEl.classList.remove('animate'), 300);
+    } catch (error) {
+      numberEl.textContent = '❌';
+      console.error(error);
+    }
+  }
+</script>
+
+
   </body>
 </html>
+
